@@ -19,7 +19,7 @@ post("/process_umbrella") do
   @user_location = params.fetch("user_location")
   gmaps_key = ENV.fetch("GMAPS_KEY")
   gmaps_url = URI("https://maps.googleapis.com/maps/api/geocode/json?address=#{@user_location}&key=#{gmaps_key}")
-  raw_gmaps_data = Net::HTTP.get(gmaps_url)
+  raw_gmaps_data = HTTP.get(gmaps_url)
   parsed_gmaps_data = JSON.parse(raw_gmaps_data)
   results_array = parsed_gmaps_data.fetch("results")
   first_result_hash = results_array.at(0)
@@ -30,7 +30,7 @@ post("/process_umbrella") do
 
   pirate_weather_key = ENV.fetch("PIRATE_WEATHER_KEY")
   pirate_weather_url = URI("https://api.pirateweather.net/forecast/#{pirate_weather_key}/#{@latitude},#{@longitude}")
-  raw_pirate_weather_data = Net::HTTP.get(pirate_weather_url)
+  raw_pirate_weather_data = HTTP.get(pirate_weather_url)
   parsed_pirate_weather_data = JSON.parse(raw_pirate_weather_data)
   currently_hash = parsed_pirate_weather_data.fetch("currently")
   @current_temp = currently_hash.fetch("temperature")
@@ -67,7 +67,7 @@ request_body_hash = {
   "messages" => [
     {
       "role" => "system",
-      "content" => "You are a helpful assistant who talks like Shakespeare."
+      "content" => "You are a helpful assistant who talks like a lady."
     },
     {
       "role" => "user",
@@ -87,9 +87,7 @@ parsed_response = JSON.parse(raw_response)
 content = parsed_response.fetch("choices")
 content2 = content[0].fetch("message")
 @content3 = content2.fetch("content")
-
-cookies.store(@message, @message)
-cookies.store(@content3, @content3)
+cookies.store(@message, @content3)
 
 erb(:add_message)
 redirect "/chat"
@@ -100,8 +98,7 @@ get("/message") do
 end
 
 post("/clear_chat") do
-  cookies.delete(:key)
-
+  cookies.clear()
   redirect "/chat" 
 end
 
