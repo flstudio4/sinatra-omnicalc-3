@@ -1,7 +1,8 @@
 require "sinatra"
 require "sinatra/reloader"
-require "net/http"
+require "http"
 require "json"
+require "sinatra/cookies"
 
 get("/") do
   "
@@ -48,36 +49,94 @@ post("/process_umbrella") do
 end
 
 get("/chat") do
-  erb(:ai_chat)
+  
+  erb(:chat)
+end
+
+post("/add_message_to_chat") do 
+
+  @message = params.fetch("user_message")
+  API_KEY = ENV.fetch("AI_API_KEY")
+  request_headers_hash = {
+  "Authorization" => "Bearer #{API_KEY}",
+  "content-type" => "application/json"
+}
+
+request_body_hash = {
+  "model" => "gpt-3.5-turbo",
+  "messages" => [
+    {
+      "role" => "system",
+      "content" => "You are a helpful assistant who talks like Shakespeare."
+    },
+    {
+      "role" => "user",
+      "content" => "#{@message}"
+    }
+  ]
+}
+
+request_body_json = JSON.generate(request_body_hash)
+
+raw_response = HTTP.headers(request_headers_hash).post(
+  "https://api.openai.com/v1/chat/completions",
+  :body => request_body_json
+).to_s
+
+parsed_response = JSON.parse(raw_response)
+content = parsed_response.fetch("choices")
+content2 = content[0].fetch("message")
+@content3 = content2.fetch("content")
+
+cookies.store(@message, @message)
+cookies.store(@content3, @content3)
+
+erb(:add_message)
+redirect "/chat"
 end
 
 get("/message") do
   erb(:ai_message)
 end
 
+post("/clear_chat") do
+  cookies.delete(:key)
+
+  redirect "/chat" 
+end
+
 post("/process_single_message") do
   @message = params.fetch("the_message")
   API_KEY = ENV.fetch("AI_API_KEY")
-  headers = {
+  request_headers_hash = {
   "Authorization" => "Bearer #{API_KEY}",
   "content-type" => "application/json"
 }
 
-body = {
+request_body_hash = {
   "model" => "gpt-3.5-turbo",
   "messages" => [
     {
       "role" => "system",
-      "content" => "#{@message}"
+      "content" => "You are a helpful assistant who talks like Shakespeare."
     },
     {
       "role" => "user",
-      "content" => "Hello! What are the best spots for tea in Chicago?"
+      "content" => "#{@message}"
     }
   ]
 }
 
-uri = URI("https://api.openai.com/v1/chat/completions")
-@response = Net::HTTP.post(uri, body.to_json, headers)
+request_body_json = JSON.generate(request_body_hash)
+
+raw_response = HTTP.headers(request_headers_hash).post(
+  "https://api.openai.com/v1/chat/completions",
+  :body => request_body_json
+).to_s
+
+parsed_response = JSON.parse(raw_response)
+content = parsed_response.fetch("choices")
+content2 = content[0].fetch("message")
+@content3 = content2.fetch("content")
   erb(:process_single_message)
 end

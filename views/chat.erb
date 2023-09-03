@@ -1,5 +1,20 @@
 <dl>
+<% cookies.each do |key, value| %>
+
+    <dt>user</dt>
+    <dd><%= value %></dd>
+    <!--<dd></dd>-->
+    
+    <dt>assistant</dt>
+    <dd><%= value %></dd>
+    <!--<dd></dd>-->
+    
+    <% end %>
+
 </dl>
+
+   
+
 
 <form action="/add_message_to_chat" method="post">
   <label for="new_message_field">You:</label>
