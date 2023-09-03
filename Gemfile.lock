@@ -65,6 +65,8 @@ GEM
     multi_json (1.15.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
+    net (0.3.3)
+      activesupport
     nio4r (2.5.9)
     nokogiri (1.14.3-x86_64-darwin)
       racc (~> 1.4)
@@ -163,6 +165,7 @@ DEPENDENCIES
   draft_matchers
   grade_runner
   i18n
+  net
   pry
   puma (~> 5.0)
   rspec
